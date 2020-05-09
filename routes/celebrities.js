@@ -5,32 +5,74 @@ const express = require('express');
 const celebrityRouter = express.Router();
 const Celebrity = require('./../models/celebrity');
 
-
 //Get a list of all celebrities
 
-celebrityRouter.get('/', (req, res,next) => {
+celebrityRouter.get('/', (req, res, next) => {
   console.log('rota');
   Celebrity.find()
-  .then((result) => {
-    res.render('celebrities/index', {celebrities: result});
-  })
-  .catch(error => {
-    next(error);
-  });
+    .then((result) => {
+      res.render('celebrities/index', { celebrities: result });
+    })
+    .catch((error) => {
+      next(error);
+    });
+});
+
+//rota para exibir celebs criadas
+celebrityRouter.get('/create', (req, res) => {
+  console.log('Oi eu sou o Goku!');
+  res.render('celebrities/create');
 });
 
 //rota  para os detalhes das celebs
-celebrityRouter.get('/:id', (req,res,next) => {
+celebrityRouter.get('/:id', (req, res, next) => {
   const celebrityId = req.params.id;
-  
+
   Celebrity.findById(celebrityId)
-.then(celebrityDetails => {
-  console.log(celebrityDetails);
-  res.render('celebrities/show', {celebrityDetails: celebrityDetails})
-})
-.catch(error => {
-  next(error);
-})
+    .then((celebrityDetails) => {
+      console.log(celebrityDetails);
+      res.render('celebrities/show', { celebrityDetails: celebrityDetails });
+    })
+    .catch((error) => {
+      next(error);
+    });
+});
+
+//rota para criar nova celeb
+celebrityRouter.post('/', (req, res, next) => {
+  console.log('rota post')
+  const newCelebrity = {
+    name: req.body.name,
+    occupation: req.body.occupation,
+    catchPhrase: req.body.catchPhrase
+  };
+
+  Celebrity.create(newCelebrity)
+  .then(() => {
+    res.redirect('celebrities');
+  })
+  .catch(error => {
+    res.render('celebrities/create');
+  });
+
+});
+
+//Deletar celebs
+celebrityRouter.post('/:id/delete', (req,res) => {
+  const celebrityId = req.params.id;
+
+    Celebrity.findByIdAndRemove(celebrityId)
+    .then(() => {
+      console.log('DELETE');
+      res.redirect('/celebrities');
+    })
+    .catch(error => {
+      console.log('ERRO: ', error);
+      next(error);
+      return error;
+
+    }
+      )
 })
 
 module.exports = celebrityRouter;
