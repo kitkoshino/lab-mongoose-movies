@@ -40,39 +40,68 @@ celebrityRouter.get('/:id', (req, res, next) => {
 
 //rota para criar nova celeb
 celebrityRouter.post('/', (req, res, next) => {
-  console.log('rota post')
+  console.log('rota post');
   const newCelebrity = {
     name: req.body.name,
     occupation: req.body.occupation,
-    catchPhrase: req.body.catchPhrase
+    catchPhrase: req.body.catchPhrase,
   };
 
   Celebrity.create(newCelebrity)
-  .then(() => {
-    res.redirect('celebrities');
-  })
-  .catch(error => {
-    res.render('celebrities/create');
-  });
-
+    .then(() => {
+      res.redirect('celebrities');
+    })
+    .catch((error) => {
+      res.render('celebrities/create');
+    });
 });
 
 //Deletar celebs
-celebrityRouter.post('/:id/delete', (req,res) => {
+celebrityRouter.post('/:id/delete', (req, res, next) => {
   const celebrityId = req.params.id;
 
-    Celebrity.findByIdAndRemove(celebrityId)
+  Celebrity.findByIdAndRemove(celebrityId)
     .then(() => {
       console.log('DELETE');
       res.redirect('/celebrities');
     })
-    .catch(error => {
+    .catch((error) => {
       console.log('ERRO: ', error);
       next(error);
       return error;
+    });
+});
 
-    }
-      )
-})
+//rota para editar celebs
+celebrityRouter.get('/:id/edit', (req, res, next) => {
+  const celebrityId = req.params.id;
+
+  Celebrity.findById(celebrityId)
+    .then((celebrityDetails) => {
+      console.log('DETAIL: ', celebrityDetails);
+      res.render('celebrities/edit', { celebrityDetails });
+    })
+    .catch((error) => {
+      next(error);
+    });
+});
+
+//editar celebs
+celebrityRouter.post('/:id', (req, res, next) => {
+  const celebrityId = req.params.id;
+  const celebrityData = {
+    name: req.body.name,
+    occupation: req.body.occupation,
+    catchPhrase: req.body.catchPhrase,
+  };
+
+  Celebrity.findByIdAndUpdate(celebrityId, celebrityData)
+    .then(() => {
+      res.redirect('/celebrities');
+    })
+    .catch((error) => {
+      next(error);
+    });
+});
 
 module.exports = celebrityRouter;
